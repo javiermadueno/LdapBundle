@@ -40,7 +40,9 @@ class DefaultController extends Controller
     {
         $token = $this->get('form.csrf_provider')
                       ->generateCsrfToken('authenticate');
-
+        
+//         echo 'token';
+//         var_dump($token);
         return $token;
     }
 }

@@ -53,32 +53,61 @@ class LdapUserProvider implements UserProviderInterface
      */
     public function loadUserByUsername($username)
     {
-        // Throw the exception if the username is not provided.
-        if (empty($username)) {
+    	if (empty($username)) {
             throw new UsernameNotFoundException('The username is not provided.');
         }
-
+        
         if (true === $this->bindUsernameBefore) {
-            $ldapUser = $this->simpleUser($username);
+        	
+        	$ldapUser = $this->simpleUser($username);
+            
         } else {
-            $ldapUser = $this->anonymousSearch($username);
+        	$ldapUser = $this->anonymousSearch($username);
         }
-
+		
         return $ldapUser;
     }
+    
+    public function loadUserByUsernamePassword($userName, $password)
+    {	
+    	if (empty($userName)) {
+    		
+    		throw new UsernameNotFoundException('The username is not provided.');
+    	}
+    	if (empty($password)) {
+    	
+    		throw new UsernameNotFoundException('The password is not provided.');
+    	}
+    
+    	if (true === $this->bindUsernameBefore) {
+    		
+    		$ldapUser = $this->simpleUserPassword($userName, $password);
+    
+    	} else {
 
+    		$ldapUser = $this->anonymousSearchPassword($userName, $password);
+    	}
+    
+    	return $ldapUser;
+    }
     /**
      * {@inheritdoc}
      */
     public function refreshUser(UserInterface $user)
     {
-        if (!$user instanceof LdapUserInterface) {
+//     	echo '-LdapUserProvider///refreshUser-';
+    	if (!$user instanceof LdapUserInterface) {
             throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', get_class($user)));
         }
 
+//         echo '-bindUserNameBefore en RefreshUser-';
+//         var_dump($this->bindUsernameBefore);
+        
         if (false === $this->bindUsernameBefore) {
+        	
             return $this->loadUserByUsername($user->getUsername());
         } else {
+        	
             return $this->bindedSearch($user->getUsername());
         }
     }
@@ -91,22 +120,30 @@ class LdapUserProvider implements UserProviderInterface
         return is_subclass_of($class, '\IMAG\LdapBundle\User\LdapUserInterface');
     }
 
-    private function simpleUser($username)
+    private function simpleUser($userName)
     {
         $ldapUser = new $this->userClass;
-        $ldapUser->setUsername($username);
+        $ldapUser->setUsername($userName);
 
         return $ldapUser;
     }
-
+    
+    private function simpleUserPassword($userName, $password)
+    {
+    	$ldapUser = new $this->userClass;
+    	$ldapUser->setUsername($userName);
+    
+    	return $ldapUser;
+    }
     private function anonymousSearch($username)
     {
         $this->ldapManager->exists($username);
 
         $lm = $this->ldapManager
             ->setUsername($username)
+            ->setLdapUserConnection()
             ->doPass();
-
+        
         $ldapUser = new $this->userClass;
 
         $ldapUser
@@ -119,13 +156,47 @@ class LdapUserProvider implements UserProviderInterface
             ->setGivenName($lm->getGivenName())
             ->setSurname($lm->getSurname())
             ->setDisplayName($lm->getDisplayName())
+            ->setCategorias($lm->getCategorias())
+            ->setCliente($lm->getCliente())
             ;
 
+//         echo 'LDAP USER-----';
+//         var_dump($ldapUser);		
         return $ldapUser;
     }
 
+    private function anonymousSearchPassword($userName, $password)
+    {
+    	$this->ldapManager->existsPassword($userName, $password);
+    
+    	$lm = $this->ldapManager
+    	->setUsername($userName)
+    	->setLdapUserConnection()
+    	->doPass();
+    
+    	$ldapUser = new $this->userClass;
+    
+    	$ldapUser
+    	->setUsername($lm->getUsername())
+    	->setEmail($lm->getEmail())
+    	->setRoles($lm->getRoles())
+    	->setDn($lm->getDn())
+    	->setCn($lm->getCn())
+    	->setAttributes($lm->getAttributes())
+    	->setGivenName($lm->getGivenName())
+    	->setSurname($lm->getSurname())
+    	->setDisplayName($lm->getDisplayName())
+    	->setCategorias($lm->getCategorias())
+    	->setCliente($lm->getCliente())
+    	;
+    
+    	return $ldapUser;
+    }
+    
     private function bindedSearch($username)
     {
-        return $this->anonymousSearch($username);
+        echo '-LdapUserProvider///bindedSearch-';
+    	
+    	return $this->anonymousSearch($username);
     }
 }

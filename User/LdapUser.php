@@ -13,7 +13,10 @@ class LdapUser implements LdapUserInterface
         $dn,
         $cn,
         $roles = array(),
-        $attributes = array()        
+        $attributes = array(),
+        $connection,
+        $categorias = array(),
+        $cliente       
         ;
 
     public function getDisplayname()
@@ -114,6 +117,11 @@ class LdapUser implements LdapUserInterface
     {
         return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
     }
+    
+    public function getCategorias()
+    {
+    	return $this->categorias;
+    }
 
     public function setUsername($username)
     {
@@ -141,6 +149,31 @@ class LdapUser implements LdapUserInterface
         $this->roles[] = $role;
 
         return $this;
+    }
+    
+    public function addCategroia($categoria)
+    {
+    	$this->categorias[] = $categoria;
+    	return $this;
+    }
+    
+    public function setCategorias(array $categorias)
+    {
+    	$this->categorias = $categorias;
+    	
+    	return $this;
+    }
+    
+    public function setCliente($cliente)
+    {
+    	$this->cliente=$cliente;
+    	
+    	return $this;
+    }
+    
+    public function getCliente()
+    {
+    	return $this->cliente;
     }
 
     public function eraseCredentials()
@@ -191,4 +224,19 @@ class LdapUser implements LdapUserInterface
     {
         return $this->getUserName();
     }
+    /**
+     * Return the connection for this user
+     * 
+     * @return string
+     */
+	public function getLdapUserConnection() {
+		return $this->connection;
+	}
+	
+	public function setLdapUserConnection($connection) {
+		
+		$this->connection = $connection;
+		return $this;
+	}
+	
 }

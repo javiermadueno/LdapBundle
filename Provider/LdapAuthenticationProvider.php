@@ -60,35 +60,48 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function authenticate(TokenInterface $token)
-    {
-        if (!$this->supports($token)) {
+    public function authenticate(TokenInterface $token){
+    	
+//     	echo '-LdapAuthenticationProvider///authenticate-';
+    	echo 'TOKEN';
+    	var_dump($token);
+    	
+    	//exit();
+    	
+    	if (!$this->supports($token)) {
             throw new AuthenticationException('Unsupported token');
         }
-
         try {
+        	//TODO
             $user = $this->userProvider
-                ->loadUserByUsername($token->getUsername());
-
+//                 ->loadUserByUsername($token->getUsername());
+            	->loadUserByUsernamePassword($token->getUsername(), $token->getCredentials());
+			
+//             echo '-User tras la loadUserByUsername-';
+//             var_dump($user);
+            
             if ($user instanceof LdapUserInterface) {
+            	
+//             	echo '-User del tipo LdapUserInterface-';
                 return $this->ldapAuthenticate($user, $token);
             }
             
         } catch (\Exception $e) {
             if ($e instanceof ConnectionException || $e instanceof UsernameNotFoundException) {
                 if ($this->hideUserNotFoundExceptions) {
-                    throw new BadCredentialsException('Bad credentials', 0, $e);
+
+//                 	echo 'AUTHENTICATE-BAD CREDENTIALS/n';
+                    throw new BadCredentialsException('Bad Credentials', 0, $e);
                 }
             }
-
             throw $e;
         }
         
         if ($user instanceof UserInterface) {
+//         	echo '-User del tipo de UserInterface-';
             return $this->daoAuthenticationProvider->authenticate($token);
         }
     }
-
     /**
      * Authentication logic to allow Ldap user
      *
@@ -99,23 +112,35 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      */
     private function ldapAuthenticate(LdapUserInterface $user, TokenInterface $token)
     {
-        $userEvent = new LdapUserEvent($user);
+//         echo 'LdapAuthenticationProvider///ldapAuthenticate()';
+    	
+    	$userEvent = new LdapUserEvent($user);
+
+//     	echo '-userEvent-';
+//     	var_dump($userEvent);
+    	
         if (null !== $this->dispatcher) {
             try {
                 $this->dispatcher->dispatch(LdapEvents::PRE_BIND, $userEvent);
             } catch (AuthenticationException $expt) {
                 if ($this->hideUserNotFoundExceptions) {
-                    throw new BadCredentialsException('Bad credentials', 0, $expt);
+                    throw new BadCredentialsException('Bad credentials 1', 0, $expt);
                 }
-
                 throw $expt;
             }
         }
-
-        $this->bind($user, $token);
+        
+//         echo '-user->getDn()-';
+//         var_dump($user->getDn());
 
         if (null === $user->getDn()) {
+        	
+//         	echo '-Llamando a reloadUser()-';
+        	
             $user = $this->reloadUser($user);
+            
+//             echo '-user resultante-';
+//             var_dump($user);
         }
         
         if (null !== $this->dispatcher) {
@@ -124,14 +149,20 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
                 $this->dispatcher->dispatch(LdapEvents::POST_BIND, $userEvent);
             } catch (AuthenticationException $authenticationException) {
                 if ($this->hideUserNotFoundExceptions) {
-                    throw new BadCredentialsException('Bad credentials', 0, $authenticationException);
+                    throw new BadCredentialsException('Bad credentials 2', 0, $authenticationException);
                 }
                 throw $authenticationException;
             }
         }
         
         $token = new UsernamePasswordToken($userEvent->getUser(), null, $this->providerKey, $userEvent->getUser()->getRoles());
+//         echo '-token antes de setearle los atributos-';
+//         var_dump($token);
+        
         $token->setAttributes($token->getAttributes());
+        
+//         echo '-token seteado-';
+//         var_dump($token);
         
         return $token;
     }
@@ -146,10 +177,19 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      */
     private function bind(LdapUserInterface $user, TokenInterface $token)
     {
-        $this->ldapManager
+//     	echo '-LDAPAUTHENTICATIONPROVIDER///BIND-';
+//     	echo '-USER PARA AUTENTICAR-';
+//     	var_dump($user->getUsername());
+//     	echo '-TOKEN/PASS para autenticar-';
+//     	var_dump($token->getCredentials());
+    	
+    	
+    	
+    	
+    	$this->ldapManager
             ->setUsername($user->getUsername())
             ->setPassword($token->getCredentials());
-        
+
         $this->ldapManager->auth();
 
         return true;
@@ -163,7 +203,11 @@ class LdapAuthenticationProvider implements AuthenticationProviderInterface
      */
     private function reloadUser(LdapUserInterface $user)
     {
-        try {
+//         echo 'LdapAuthenticationProvider///reloadUser()';
+    	
+    	try {
+        	
+        	echo '-Refrescando el usuario';
             $user = $this->userProvider->refreshUser($user);
         } catch (UsernameNotFoundException $userNotFoundException) {
             if ($this->hideUserNotFoundExceptions) {

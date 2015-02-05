@@ -1,23 +1,47 @@
-{% extends "IMAGLdapBundle::layout.html.twig" %}
 
+{% block stylesheets %}
+	<link href="{{ asset('css/estilosBase.css') }}" rel="stylesheet" />
+	<link href="{{ asset('css/login.css') }}" rel="stylesheet" />
+	<script src="{{ asset('js/jquery-1.7.1.min.js') }}" ></script>
+{% endblock %}
 {% block imag_ldap_content %}
-    {% if error %}
-        <div>{{ error.message }}</div>
-    {% endif %}
-
+<div id="headContainer" class="headContainer">
+	<img id="logo_rm" class="imagenes_cabecera componentes_logo" src="{{ asset('img/minilogo.png') }}" />
+	<img id="logo" class="imagenes_cabecera componentes_logo" src="{{ asset('img/nombre.png') }}"/>
+</div> 
+<div id="container">
     <form action="{{ path('login_check') }}" method="post">
         <label for="username">Username:</label>
-        <input type="text" id="username" name="_username" value="{{ last_username }}" />
+        <input type="text" id="username" name="_username" value="{{ last_username }}" autofocus />
 
         <label for="password">Password:</label>
         <input type="password" id="password" name="_password" />
 
         {#
         If you want to control the URL the user is redirected to on success (more details below)
-        <input type="hidden" name="_target_path" value="/account" />
-        #}
+        <input type="hidden" name="_target_path" value="/account" />#}
+        {% if error %}
+       		<div class="errorMessage">&nbsp&nbsp&nbsp&nbsp&nbsp{{ error.message }}</div>
+    	{% endif %}
 
         <input type="hidden" name="_csrf_token" value="{{ token }}" />
-        <input type="submit" name="login" />
+        <input type="submit" name="login" value="Login"/>
     </form>
+</div>    
+{# 		<div id="container">       #}
+{# 			<form action="{{ path('login_check') }}" method="post">#}
+{# 				<label for="username">Username:</label>#}
+{# 				<input type="text" id="username" name="username">#}
+{# 				<label for="password">Password:</label>#}
+{# 				<input type="password" id="password" name="password">#}
+{# 				{% if error %}#}
+{#        				<div class="errorMessage">&nbsp&nbsp&nbsp&nbsp&nbsp{{ error.message }}</div>#}
+{#     			{% endif %}#}
+{# 				<input type="hidden" name="_csrf_token" value="{{ token }}" />#}
+{# 				<div id="lower">#}
+{# 					<input type="submit" name="login" value="Login">#}
+{# 				</div><!--/ lower-->#}
+{# 			</form>#}
+{# 		</div>#}
 {% endblock %}
+

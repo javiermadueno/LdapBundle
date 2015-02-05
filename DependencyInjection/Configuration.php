@@ -16,6 +16,7 @@ class Configuration implements ConfigurationInterface
             ->append($this->addClientNode())
             ->append($this->addUserNode())
             ->append($this->addRoleNode())
+            ->append($this->addClienteNode())
             ->scalarNode('user_class')
               ->defaultValue("IMAG\LdapBundle\User\LdapUser")
             ->end()
@@ -87,6 +88,29 @@ class Configuration implements ConfigurationInterface
           ;
 
       return $node;
+  }
+  
+  private function addClienteNode()
+  {
+  	$treeBuilder = new TreeBuilder();
+  	$node = $treeBuilder->root('cliente');
+  	
+  	$node
+	  	->children()
+	  	->scalarNode('base_dn')->isRequired()->cannotBeEmpty()->end()
+	  	->scalarNode('filter')->end()
+	  	->scalarNode('name_attribute')->defaultValue('cn')->end()
+	  	->scalarNode('user_attribute')->defaultValue('member')->end()
+	  	->scalarNode('user_id')->defaultValue('dn')
+	  		->validate()
+	  			->ifNotInArray(array('dn', 'username'))
+	  			->thenInvalid('Only dn or username')
+	  			->end()
+	  		->end()
+	  	->end()
+  	;
+  	
+  	return $node;
   }
 
 }

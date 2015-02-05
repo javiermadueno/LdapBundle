@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <meta http-equiv="Content-Type" content="text/html;" charset="UTF-8"/>
+	    <title>{% block title %}{% endblock %}</title>
+	    {% block stylesheets %}
+	    	<link href="{{ asset('css/estilosBase.css') }}" rel="stylesheet" />
+	    	<link href="{{ asset('css/login.css') }}" rel="stylesheet" />
+	    	<script src="{{ asset('js/jquery-1.7.1.min.js') }}" ></script>
+	    {% endblock %}
+	    {% block rss %}{% endblock %}
+	</head>
+	
+	<body id="{% block id '' %}">
+		<header id="cab">
+	        {% block header %}
+{# 	        	<img id="logo_cliente" class="imagenes_cabecera componentes_logo" src="{{ asset('img/1/logoPrincipalCliente.png') }}" />#}
+{# 				<img id="logo_rm" class="imagenes_cabecera componentes_logo" src="{{ asset('img/minilogo.png') }}" />#}
+{# 				<img id="logo_nombre" class="imagenes_cabecera componentes_logo" src="{{ asset('img/nombre.png') }}"/>#}
+	        	
+{# 	        	<img id="logo_cliente" class="imagenes_cabecera componentes_logo" src="{{ urlImgCentro }}logoPrincipalCliente.png" />#}
+{# 				<img id="logo_rm" class="imagenes_cabecera componentes_logo" src="{{ asset('img/minilogo.png') }}" />#}
+{# 				<img id="logo_nombre" class="imagenes_cabecera componentes_logo" src="{{ asset('img/nombre.png') }}"/>#}
+	        {% endblock %}
+	    </header>
+		<div id="cuerpo">
+            {% block imag_ldap_content %}
+            {% endblock imag_ldap_content %}
+	    </div>
+		<footer>
+		    {% block footer %}{% endblock %}    
+		</footer>
+		{% block javascripts %}
+			<script type="text/javascript">
+				function getURLVar(urlStr,urlVarName) {
+					var urlHalves = urlStr.split('?');
+					var urlVarValue = '';
+					if(urlHalves[1]) {
+						var urlVars = urlHalves[1].split('&');
+						for(i=0; i<=(urlVars.length); i++){
+							if(urlVars[i]){
+								var urlVarPair = urlVars[i].split('=');
+								if (urlVarPair[0] && urlVarPair[0] == urlVarName) {
+	
+									urlVarValue = urlVarPair[1];
+									break;
+								}
+							}
+						}
+					}
+					return urlVarValue
+				}
+
+				function habilitarSoloNumerosConDecimales(){
+					$('.soloNum').keydown(function(e) {
+						if ((e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105) && e.keyCode != 8 && e.keyCode != 9 && e.keyCode != 110 && e.keyCode != 190 && e.keyCode != 109 && e.keyCode != 173 )
+					          e.preventDefault();
+					});
+				}
+
+				function habilitarSoloNumeros(){
+					$('.soloNum').keydown(function(e) {
+						if ((e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)&& e.keyCode != 8 && e.keyCode != 46)
+					          e.preventDefault();
+					});
+				}
+			</script>
+		{% endblock %}
+	</body>
+</html>
